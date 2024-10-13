@@ -1,0 +1,3 @@
+/* BearingVector.h
+ *
+ */
