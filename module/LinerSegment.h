@@ -2,10 +2,11 @@
  * Linked file LinerSegment.cpp
  * Security: Top Secret
  * Author: Minseok Doo
- * Date: Oct 7, 2024
+ * Date: Oct 9, 2024
  * 
- * Purpose:
- * Sampling the B-Spline line
+ * Purpose: 
+ * 1. Create B-Spline line
+ * 2. Create Polygon Vertex based on LOD
  * 
  * Equations
  * Equ(1): R_i=R_z\left(\theta_i\right)R_y\left(\phi_i\right)
@@ -23,8 +24,76 @@
  * Equ(13): \vec{P_n}=\vec{N_2}
  * Equ(14): \kappa\left(t\right)=\frac{|\vec{B^{\prime\prime}}\left(t\right)\times\vec{B^\prime}\left(t\right)|}{|\vec{B^\prime}\left(t\right)|^3}
  */
+#ifndef LINERSEGMENT_H
+#define LINERSEGMENT_H
 
 #include "NodeVector.h"
 #include "BearingVector.h"
 #include <vector>
 #include <cmath>
+
+// Simple Vector3 struct for vector operations
+struct Vector3 {
+    float x, y, z;
+    Vector3(float xVal = 0, float yVal = 0, float zVal = 0) : x(xVal), y(yVal), z(zVal) {}
+
+    // Vector addition
+    Vector3 operator+(const Vector3& v) const { return Vector3(x + v.x, y + v.y, z + v.z); }
+    // Vector subtraction
+    Vector3 operator-(const Vector3& v) const { return Vector3(x - v.x, y - v.z, z - v.z); }
+    // Scalar multiplication (Vector3 * float)
+    Vector3 operator*(float scalar) const { return Vector3(x * scalar, y * scalar, z * scalar); }
+    // Cross product
+    Vector3 cross(const Vector3& v) const {
+        return Vector3(
+            y * v.z - z * v.y,
+            z * v.x - x * v.z,
+            x * v.y - y * v.x
+        );
+    }
+    // Vector magnitude
+    float magnitude() const { return sqrt(x * x + y * y + z * z); }
+
+    // Friend function for scalar multiplication (float * Vector3)
+    friend Vector3 operator*(float scalar, const Vector3& v) {
+        return Vector3(v.x * scalar, v.y * scalar, v.z * scalar);
+    }
+};
+
+struct NodeVectorWithBearing {
+    NodeVector node;
+    std::vector<BearingVector> bearings;
+};
+
+class LinerSegment {
+private:
+    float LevelOfDetail;
+    NodeVectorWithBearing node_1;
+    NodeVectorWithBearing node_2;
+    std::vector<Vector3> controlPoints;
+    std::vector<Vector3> sampledPoints;
+    float alpha; // Blending factor for control points
+    float L_min, L_max; // Min and Max lengths for Equ(6) and Equ(7)
+
+    // Helper functions
+    void calculateControlPoints();
+    void calculateBSpline();
+    int binomialCoefficient(int n, int k);
+
+public:
+    // Constructor
+    LinerSegment(const NodeVectorWithBearing& n1, const NodeVectorWithBearing& n2, float lod, float alphaVal = 0.5f);
+
+    // Functions to generate the B-Spline and sample vertices
+    void SamplingBSpline();
+    void SamplingVertex();
+
+    // Getters
+    const std::vector<Vector3>& getSampledPoints() const { return sampledPoints; }
+    const std::vector<Vector3>& getControlPoints() const { return controlPoints; }
+
+    // Setters
+    void setLevelOfDetail(float lod) { LevelOfDetail = lod; }
+};
+
+#endif // LINERSEGMENT_H
