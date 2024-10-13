@@ -11,3 +11,4 @@
  * Equ(1): \vec{N_i}=\left(r_i,\theta_i,\phi_i\right)
  */
 
+#include "CoordinateConverter.h"

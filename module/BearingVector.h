@@ -11,3 +11,6 @@
  * Equ(2): \vec{B_{i,d}}=\left(B_{i,d,x},B_{i,d,y},B_{i,d,z}\right)
  * Equ(3): \vec{F_i}=F_{x_i}\thinsp\hat{x}+F_{y_i}\thinsp\hat{y}+F_{z_i}\thinsp\hat{z}
  */
+
+#include "CoordinateConverter.h"
+#include "NodeVector.h"
