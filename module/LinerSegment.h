@@ -4,7 +4,8 @@
  * Author: Minseok Doo
  * Date: Oct 7, 2024
  * 
- * Purpose: 
+ * Purpose:
+ * Sampling the B-Spline line
  * 
  * Equations
  * Equ(1): R_i=R_z\left(\theta_i\right)R_y\left(\phi_i\right)
@@ -22,3 +23,8 @@
  * Equ(13): \vec{P_n}=\vec{N_2}
  * Equ(14): \kappa\left(t\right)=\frac{|\vec{B^{\prime\prime}}\left(t\right)\times\vec{B^\prime}\left(t\right)|}{|\vec{B^\prime}\left(t\right)|^3}
  */
+
+#include "NodeVector.h"
+#include "BearingVector.h"
+#include <vector>
+#include <cmath>
