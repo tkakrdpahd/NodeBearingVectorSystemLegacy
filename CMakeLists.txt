@@ -11,6 +11,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # 실행 파일에 포함될 소스 파일 지정
 set(SOURCES
     main.cpp
+    module/CoordinateConverter.cpp
+    module/NodeVector.cpp
+    module/BearingVector.cpp
+    module/AttributesManager.cpp
 )
 
 # 실행 파일 생성
