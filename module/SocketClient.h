@@ -1,3 +1,0 @@
-/* SocketClient.h
- * 
- */
