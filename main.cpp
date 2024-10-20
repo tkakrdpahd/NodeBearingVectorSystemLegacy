@@ -8,7 +8,7 @@
 #include <cmath>
 #include "NodeVector.h"
 #include "AttributesManager.h"
-#include "SocketClient.h"
+#include "SocketServer.h"
 #include "YamlConvertor.h"
 
 void NodeVectorTest(AttributesManager& _attributesManager) {
