@@ -9,6 +9,7 @@
 
 #include "SocketServer.h"
 #include "AttributesManager.h"
+#include "YamlConverter.h"
 #include <iostream>
 #include <unistd.h>
 #include <cstring>
@@ -70,7 +71,9 @@ void SocketServer::listenForClients() {
                 std::cout << "Received: " << buffer << std::endl;
 
                 if (std::string(buffer) == "call_attributes_manager") {
-                    std::string response = GetAttributesManagerData();
+                    AttributesManager attributesManager;
+                    YamlConverter yamlConverter;
+                    std::string response = yamlConverter.ToString(attributesManager);
                     sendResponse(clientSocket, response);
                 } else {
                     sendResponse(clientSocket, "Unknown command received.");
