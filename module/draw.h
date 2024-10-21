@@ -10,14 +10,15 @@
 
 #ifndef DRAW_H
 #define DRAW_H
-
+// AttributesManager 포함
+#include "AttributesManager.h"
 #ifdef __APPLE__
-#include <GLUT/glut.h>   // MacOS 환경
+// MacOS 환경
+#include <GLUT/glut.h>
 #else
-#include <GL/glut.h>     // 다른 환경 (Linux 등)
+// 다른 환경 (Linux 등)
+#include <GL/glut.h>
 #endif
-
-#include "AttributesManager.h"  // AttributesManager 포함
 
 class Draw {
     private:

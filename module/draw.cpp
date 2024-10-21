@@ -4,9 +4,7 @@
  * Author: Minseok Doo
  * Date: Oct 20, 2024
  */
-
 #include "Draw.h"
-
 #ifdef __APPLE__
 #include <GLUT/glut.h>   // MacOS 환경
 #else
