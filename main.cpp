@@ -123,7 +123,7 @@ void YamlConverterTest(AttributesManager& _attributesManager) {
     std::string yamlString = yamlConverter.ToString(_attributesManager);
 
     // YAML 문자열을 출력하거나 파일로 저장 (로그로 저장)
-    std::ofstream logFile("log/attributes_log.yaml");
+    std::ofstream logFile("../log/attributes_log.yaml");
     if (logFile.is_open()) {
         logFile << yamlString;
         logFile.close();
