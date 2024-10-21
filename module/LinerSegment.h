@@ -74,6 +74,8 @@ struct LinerSegmentData {
     int LinerBufferIndex;
     NodeVector NodeStart;
     NodeVector NodeEnd;
+    float LevelOfDetail;
+    float alpha;
 };
 
 class LinerSegment {
@@ -95,15 +97,16 @@ public:
     // Constructor
     LinerSegment(const NodeVectorWithBearing& n1, const NodeVectorWithBearing& n2, float lod, float alphaVal = 0.5f);
 
-    LinerSegmentData LinerSegmentData;
     // Functions to generate the Bezier curve and sample vertices
     void SamplingBezierCurve();
     void SamplingVertex();
-    void ReturnLinerSegmentData();
+    LinerSegmentData ReturnLinerSegmentData() const; // 함수 선언
 
     // Getters
     const std::vector<Vector3>& getSampledPoints() const { return sampledPoints; }
     const std::vector<Vector3>& getControlPoints() const { return controlPoints; }
+    float getLevelOfDetail() const { return LevelOfDetail; }
+    float getAlpha() const { return alpha; }
 
     // Setters
     void setLevelOfDetail(float lod) { LevelOfDetail = lod; }

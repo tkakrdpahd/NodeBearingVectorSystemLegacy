@@ -157,7 +157,13 @@ void LinerSegment::SamplingVertex() {
     // Implementation depends on how you want to use these vertices
 }
 
-// Return LinerSegmentData (Implementation placeholder)
-void LinerSegment::ReturnLinerSegmentData() {
-    // Implement data return functionality as needed
+// Return LinerSegmentData (Implementation)
+LinerSegmentData LinerSegment::ReturnLinerSegmentData() const {
+    LinerSegmentData data;
+    data.LinerBufferIndex = 0; // 필요한 경우 적절한 값으로 설정
+    data.NodeStart = node_1.node;
+    data.NodeEnd = node_2.node;
+    data.LevelOfDetail = LevelOfDetail;
+    data.alpha = alpha;
+    return data;
 }

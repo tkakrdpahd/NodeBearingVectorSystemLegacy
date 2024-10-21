@@ -1,3 +1,10 @@
+/* YamlConverter.cpp
+ * Implementation of the YamlConverter class
+ * Security: Top Secret
+ * Author: Minseok Doo
+ * Date: Oct 20, 2024
+ */
+
 #include "YamlConverter.h"
 #include "AttributesManager.h"
 #include <yaml-cpp/yaml.h>
@@ -45,7 +52,7 @@ std::string YamlConverter::ToString(const AttributesManager &attributesManager) 
     out << YAML::BeginSeq;
     for (const auto& bearing : attributes.bearingVectors) {
         out << YAML::BeginMap;
-        out << YAML::Key << "index" << YAML::Value << bearing.getNodeIndex();
+        out << YAML::Key << "nodeIndex" << YAML::Value << bearing.getNodeIndex();
         out << YAML::Key << "depth" << YAML::Value << bearing.getDepth();
 
         out << YAML::Key << "angles" << YAML::BeginMap;
@@ -70,29 +77,77 @@ std::string YamlConverter::ToString(const AttributesManager &attributesManager) 
     for (const auto& segment : attributes.linerSegments) {
         out << YAML::BeginMap;
 
-        const auto& controlPoints = segment.getControlPoints();
-        out << YAML::Key << "controlPoints" << YAML::BeginSeq;
-        for (const auto& point : controlPoints) {
-            out << YAML::BeginMap;
-            out << YAML::Key << "x" << YAML::Value << point.x;
-            out << YAML::Key << "y" << YAML::Value << point.y;
-            out << YAML::Key << "z" << YAML::Value << point.z;
-            out << YAML::EndMap;
-        }
-        out << YAML::EndSeq;
+        // LinerSegmentData를 사용하여 모든 멤버 변수 출력
+        LinerSegmentData segmentData = segment.ReturnLinerSegmentData();
 
-        const auto& sampledPoints = segment.getSampledPoints();
-        out << YAML::Key << "sampledPoints" << YAML::BeginSeq;
-        for (const auto& point : sampledPoints) {
-            out << YAML::BeginMap;
-            out << YAML::Key << "x" << YAML::Value << point.x;
-            out << YAML::Key << "y" << YAML::Value << point.y;
-            out << YAML::Key << "z" << YAML::Value << point.z;
-            out << YAML::EndMap;
-        }
-        out << YAML::EndSeq;
+        // LinerBufferIndex 출력
+        out << YAML::Key << "LinerBufferIndex" << YAML::Value << segmentData.LinerBufferIndex;
 
+        // NodeStart 정보 출력
+        out << YAML::Key << "NodeStart";
+        out << YAML::BeginMap;
+        auto sphericalStart = segmentData.NodeStart.GetSphericalNodeVector();
+        // auto cartesianStart = segmentData.NodeStart.GetCartesianNodeVector();
+        out << YAML::Key << "index" << YAML::Value << sphericalStart.i_n;
+        out << YAML::Key << "spherical" << YAML::BeginMap;
+        out << YAML::Key << "r" << YAML::Value << sphericalStart.r_i_n;
+        out << YAML::Key << "theta" << YAML::Value << sphericalStart.theta_i_n;
+        out << YAML::Key << "phi" << YAML::Value << sphericalStart.phi_i_n;
         out << YAML::EndMap;
+        // out << YAML::Key << "cartesian" << YAML::BeginMap;
+        // out << YAML::Key << "x" << YAML::Value << cartesianStart.x_i_n;
+        // out << YAML::Key << "y" << YAML::Value << cartesianStart.y_i_n;
+        // out << YAML::Key << "z" << YAML::Value << cartesianStart.z_i_n;
+        // out << YAML::EndMap;
+        out << YAML::EndMap;
+
+        // NodeEnd 정보 출력
+        out << YAML::Key << "NodeEnd";
+        out << YAML::BeginMap;
+        auto sphericalEnd = segmentData.NodeEnd.GetSphericalNodeVector();
+        // auto cartesianEnd = segmentData.NodeEnd.GetCartesianNodeVector();
+        out << YAML::Key << "index" << YAML::Value << sphericalEnd.i_n;
+        out << YAML::Key << "spherical" << YAML::BeginMap;
+        out << YAML::Key << "r" << YAML::Value << sphericalEnd.r_i_n;
+        out << YAML::Key << "theta" << YAML::Value << sphericalEnd.theta_i_n;
+        out << YAML::Key << "phi" << YAML::Value << sphericalEnd.phi_i_n;
+        out << YAML::EndMap;
+        // out << YAML::Key << "cartesian" << YAML::BeginMap;
+        // out << YAML::Key << "x" << YAML::Value << cartesianEnd.x_i_n;
+        // out << YAML::Key << "y" << YAML::Value << cartesianEnd.y_i_n;
+        // out << YAML::Key << "z" << YAML::Value << cartesianEnd.z_i_n;
+        // out << YAML::EndMap;
+        out << YAML::EndMap;
+
+        // LevelOfDetail과 alpha 출력
+        out << YAML::Key << "LevelOfDetail" << YAML::Value << segmentData.LevelOfDetail;
+        out << YAML::Key << "alpha" << YAML::Value << segmentData.alpha;
+
+        // Control Points 출력
+        // const auto& controlPoints = segment.getControlPoints();
+        // out << YAML::Key << "controlPoints" << YAML::BeginSeq;
+        // for (const auto& point : controlPoints) {
+        //     out << YAML::BeginMap;
+        //     out << YAML::Key << "x" << YAML::Value << point.x;
+        //     out << YAML::Key << "y" << YAML::Value << point.y;
+        //     out << YAML::Key << "z" << YAML::Value << point.z;
+        //     out << YAML::EndMap;
+        // }
+        // out << YAML::EndSeq;
+
+        // Sampled Points 출력
+        // const auto& sampledPoints = segment.getSampledPoints();
+        // out << YAML::Key << "sampledPoints" << YAML::BeginSeq;
+        // for (const auto& point : sampledPoints) {
+        //     out << YAML::BeginMap;
+        //     out << YAML::Key << "x" << YAML::Value << point.x;
+        //     out << YAML::Key << "y" << YAML::Value << point.y;
+        //     out << YAML::Key << "z" << YAML::Value << point.z;
+        //     out << YAML::EndMap;
+        // }
+        // out << YAML::EndSeq;
+
+        // out << YAML::EndMap;
     }
     out << YAML::EndSeq;
 
