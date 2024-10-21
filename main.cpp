@@ -7,6 +7,7 @@
 #include <iostream>
 #include <cmath>
 #include <fstream>
+#include <GLUT/glut.h> // Added for OpenGL
 // Header File
 #include "CoordinateConverter.h"
 #include "NodeVector.h"
@@ -17,6 +18,9 @@
 #include "SocketServer.h"
 #include "YamlConverter.h"
 #include "Draw.h"
+
+// 전역 변수 선언
+AttributesManager attributesManager;
 
 // Test Functions
 
@@ -129,13 +133,145 @@ void YamlConverterTest(AttributesManager& _attributesManager) {
     }
 }
 
-int main() {
+void DrawTest() {
+    // 윈도우의 너비와 높이 가져오기
+    int width = glutGet(GLUT_WINDOW_WIDTH);
+    int height = glutGet(GLUT_WINDOW_HEIGHT);
+
+    // 뷰포트 설정
+    glViewport(0, 0, width, height);
+
+    // **투영 행렬 설정**
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(45.0, static_cast<float>(width) / static_cast<float>(height), 1.0, 1000.0);
+
+    // 모델뷰 행렬로 전환
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    // 화면과 깊이 버퍼 지우기
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // 카메라 설정 (카메라 위치를 적절히 조정)
+    gluLookAt(0.0, 0.0, 250.0,  // 카메라 위치를 조정하여 장면 전체가 보이도록 설정
+              0.0, 0.0, 0.0,    // 원점을 바라봄
+              0.0, 1.0, 0.0);   // 상단을 위로 설정
+
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+    // AttributesManager를 통해 객체들 가져오기
+    const auto& nodeVectors = attributesManager.getNodeVectors();
+    const auto& bearingVectors = attributesManager.getBearingVectors();
+    const auto& linerSegments = attributesManager.getLinerSegments();
+
+    // Print out the values to confirm they're being retrieved correctly
+    std::cout << "NodeVectors count: " << nodeVectors.size() << std::endl;
+    for (const auto& node : nodeVectors) {
+        CartesianNodeVector cartNode = node.GetCartesianNodeVector();
+        std::cout << "Node Vector - ID: " << node.GetSphericalNodeVector().i_n << ", Position: (" << cartNode.x_i_n << ", " << cartNode.y_i_n << ", " << cartNode.z_i_n << ")" << std::endl;
+    }
+
+    std::cout << "BearingVectors count: " << bearingVectors.size() << std::endl;
+    for (const auto& bearing : bearingVectors) {
+        CartesianBearingVector cartBearing = bearing.convertToCartesianBearingVector();
+        std::cout << "Bearing Vector - Node Index: " << bearing.getNodeIndex() << ", Position: (" << cartBearing.x << ", " << cartBearing.y << ", " << cartBearing.z << ")" << std::endl;
+    }
+
+    std::cout << "LinerSegments count: " << linerSegments.size() << std::endl;
+    for (const auto& segment : linerSegments) {
+        const auto& sampledPoints = segment.getSampledPoints();
+        std::cout << "Liner Segment - Sampled Points count: " << sampledPoints.size() << std::endl;
+        for (const auto& point : sampledPoints) {
+            std::cout << "Sampled Point - Position: (" << point.x << ", " << point.y << ", " << point.z << ")" << std::endl;
+        }
+    }
+
+    if (nodeVectors.empty() || bearingVectors.empty() || linerSegments.empty()) {
+        std::cerr << "Insufficient objects for rendering!" << std::endl;
+        return;
+    }
+
+    // **노드 벡터 그리기 (녹색)**
+    glColor3f(0.0f, 1.0f, 0.0f);  // 녹색
+    glPointSize(15.0f);           // 점 크기 크게 설정
+    glBegin(GL_POINTS);
+    for (const auto& node : nodeVectors) {
+        CartesianNodeVector cartNode = node.GetCartesianNodeVector();
+        std::cout << "Drawing Node at: (" << cartNode.x_i_n << ", " << cartNode.y_i_n << ", " << cartNode.z_i_n << ")" << std::endl;
+        glVertex3f(cartNode.x_i_n, cartNode.y_i_n, cartNode.z_i_n);
+    }
+    glEnd();
+
+    // **베어링 벡터 그리기 (청록색)**
+    glColor3f(0.0f, 1.0f, 1.0f);  // Cyan
+    glPointSize(12.0f);           // 점 크기 크게 설정
+    glBegin(GL_POINTS);
+    for (const auto& bearing : bearingVectors) {
+        CartesianBearingVector cartBearing = bearing.convertToCartesianBearingVector();
+        std::cout << "Drawing Bearing at: (" << cartBearing.x << ", " << cartBearing.y << ", " << cartBearing.z << ")" << std::endl;
+        glVertex3f(cartBearing.x, cartBearing.y, cartBearing.z);
+    }
+    glEnd();
+
+    // **베어링 벡터와 노드 사이의 연결 선 그리기 (녹색)**
+    glColor3f(0.0f, 1.0f, 0.0f); // 녹색
+    glLineWidth(3.0f);           // 선 굵기 설정
+    glBegin(GL_LINES);
+    for (const auto& bearing : bearingVectors) {
+        int nodeIndex = bearing.getNodeIndex();
+        if (nodeIndex > 0 && nodeIndex <= nodeVectors.size()) {
+            CartesianNodeVector cartNode = nodeVectors[nodeIndex - 1].GetCartesianNodeVector();
+            CartesianBearingVector cartBearing = bearing.convertToCartesianBearingVector();
+            std::cout << "Drawing Line from Node to Bearing: Node(" << cartNode.x_i_n << ", " << cartNode.y_i_n << ", " << cartNode.z_i_n << ") to Bearing(" << cartBearing.x << ", " << cartBearing.y << ", " << cartBearing.z << ")" << std::endl;
+            glVertex3f(cartNode.x_i_n, cartNode.y_i_n, cartNode.z_i_n);
+            glVertex3f(cartBearing.x, cartBearing.y, cartBearing.z);
+        }
+    }
+    glEnd();
+
+    // **LinerSegment 샘플링된 포인트 그리기 (회색)**
+    glColor3f(0.5f, 0.5f, 0.5f);  // Gray
+    glPointSize(10.0f);           // 점 크기 크게 설정
+    glBegin(GL_POINTS);
+    for (const auto& segment : linerSegments) {
+        const auto& sampledPoints = segment.getSampledPoints();
+        for (const auto& point : sampledPoints) {
+            std::cout << "Drawing Sampled Point at: (" << point.x << ", " << point.y << ", " << point.z << ")" << std::endl;
+            glVertex3f(point.x, point.y, point.z);
+        }
+    }
+    glEnd();
+
+    // 그린 내용을 화면에 출력
+    glutSwapBuffers();
+}
+
+int main(int argc, char** argv) {
     AttributesManager _attributesManager;
 
     // 테스트 함수 호출
     AttributesManagerTest(_attributesManager);
     YamlConverterTest(_attributesManager);
 
-    std::cout << "Hello World!!!" << std::endl;
+    // 전역 AttributesManager 업데이트
+    attributesManager = _attributesManager;
+
+    // OpenGL 초기화
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitWindowSize(800, 600);
+    glutCreateWindow("Draw Test");
+
+    // 배경 색상을 설정
+    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+    glEnable(GL_DEPTH_TEST);
+
+    // 콜백 함수 등록 (DrawTest 함수 등록)
+    glutDisplayFunc(DrawTest);
+
+    // OpenGL 메인 루프 시작
+    glutMainLoop();
+
     return 0;
 }
