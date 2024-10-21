@@ -42,13 +42,13 @@ void BearingVectorTest(AttributesManager& _attributesManager) {
     NodeVector node(1, sphericalNode);
 
     BearingVector bearingVector1(1, 1, node, static_cast<float>(M_PI / 4), static_cast<float>(M_PI / 6), 5.0f, 3.0f, 2.0f);
-    // BearingVector bearingVector1_1(1, 2, node, static_cast<float>(M_PI / 2), static_cast<float>(M_PI / 9), 8.0f, 1.0f, 5.0f); // Node 1에 대한 두 번째 벡터
+    BearingVector bearingVector1_1(1, 2, node, static_cast<float>(M_PI / 2), static_cast<float>(M_PI / 9), 8.0f, 1.0f, 5.0f); // Node 1에 대한 두 번째 벡터
     BearingVector bearingVector2(2, 1, node, static_cast<float>(M_PI / 3), static_cast<float>(M_PI / 8), 2.0f, 4.0f, 3.0f);
     BearingVector bearingVector3(3, 1, node, static_cast<float>(M_PI / 6), static_cast<float>(M_PI / 5), 1.0f, 1.5f, 2.5f);
 
     // AttributesManager를 사용하여 BearingVector 생성 및 저장
     _attributesManager.CreateBearingVector(bearingVector1);
-    // _attributesManager.CreateBearingVector(bearingVector1_1); // 추가된 BearingVector를 다시 활성화합니다.
+    _attributesManager.CreateBearingVector(bearingVector1_1); // 추가된 BearingVector를 다시 활성화합니다.
     _attributesManager.CreateBearingVector(bearingVector2);
     _attributesManager.CreateBearingVector(bearingVector3);
 }
