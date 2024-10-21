@@ -105,13 +105,13 @@ void LinerSegmentTest(AttributesManager& _attributesManager) {
         std::cout << "Node 2 bearing vectors count: " << node2.bearings.size() << std::endl;
 
         // LinerSegment 생성 및 AttributesManager에 추가
-        LinerSegment linerSegment(node1, node2, 50);
+        LinerSegment linerSegment(node1, node2, 500);
 
         // AttributesManager를 사용하여 LinerSegment 생성 및 저장
         _attributesManager.CreateLinerSegment(linerSegment);
 
         // LinerSegment의 샘플링된 점 출력
-        linerSegment.SamplingBSpline();
+        linerSegment.SamplingBezierCurve(); // 함수 이름 변경됨
         const auto& sampledPoints = linerSegment.getSampledPoints();
         if (!sampledPoints.empty()) {
             std::cout << "Sampled Points from LinerSegment:" << std::endl;
@@ -190,7 +190,7 @@ void DisplayCallback() {
     glLoadIdentity();
 
     // 카메라 설정
-    gluLookAt(0.0, 0.0, 15.0,  // 카메라 위치
+    gluLookAt(0.0, 0.0, 50.0,  // 카메라 위치
               5.0, 12.0, 5.0,   // 바라보는 지점
               0.0, 1.0, 0.0);   // 상단을 위로 설정
 

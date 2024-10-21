@@ -31,6 +31,7 @@
 #include "BearingVector.h"
 #include <vector>
 #include <cmath>
+#include <iostream> // 디버깅을 위한 헤더 추가
 
 // Simple Vector3 struct for vector operations
 struct Vector3 {
@@ -40,9 +41,13 @@ struct Vector3 {
     // Vector addition
     Vector3 operator+(const Vector3& v) const { return Vector3(x + v.x, y + v.y, z + v.z); }
     // Vector subtraction
-    Vector3 operator-(const Vector3& v) const { return Vector3(x - v.x, y - v.z, z - v.z); }
+    Vector3 operator-(const Vector3& v) const { return Vector3(x - v.x, y - v.y, z - v.z); }
     // Scalar multiplication (Vector3 * float)
     Vector3 operator*(float scalar) const { return Vector3(x * scalar, y * scalar, z * scalar); }
+    // Scalar division
+    Vector3 operator/(float scalar) const { return Vector3(x / scalar, y / scalar, z / scalar); }
+    // Dot product
+    float dot(const Vector3& v) const { return x * v.x + y * v.y + z * v.z; }
     // Cross product
     Vector3 cross(const Vector3& v) const {
         return Vector3(
@@ -65,6 +70,12 @@ struct NodeVectorWithBearing {
     std::vector<BearingVector> bearings;
 };
 
+struct LinerSegmentData {
+    int LinerBufferIndex;
+    NodeVector NodeStart;
+    NodeVector NodeEnd;
+};
+
 class LinerSegment {
 private:
     float LevelOfDetail;
@@ -77,16 +88,18 @@ private:
 
     // Helper functions
     void calculateControlPoints();
-    void calculateBSpline();
+    void calculateBezierCurve();
     int binomialCoefficient(int n, int k);
 
 public:
     // Constructor
     LinerSegment(const NodeVectorWithBearing& n1, const NodeVectorWithBearing& n2, float lod, float alphaVal = 0.5f);
 
-    // Functions to generate the B-Spline and sample vertices
-    void SamplingBSpline();
+    LinerSegmentData LinerSegmentData;
+    // Functions to generate the Bezier curve and sample vertices
+    void SamplingBezierCurve();
     void SamplingVertex();
+    void ReturnLinerSegmentData();
 
     // Getters
     const std::vector<Vector3>& getSampledPoints() const { return sampledPoints; }
