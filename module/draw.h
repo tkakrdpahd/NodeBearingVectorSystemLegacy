@@ -17,16 +17,29 @@
 #include <GL/glut.h>     // 다른 환경 (Linux 등)
 #endif
 
-// Function to initialize OpenGL settings
-void InitializeOpenGL();
+#include "AttributesManager.h"  // AttributesManager 포함
 
-// Function to set up the viewport and projection
-void SetupViewport(int width, int height);
-
-// Function to draw a point at the given Cartesian coordinates (x, y, z)
-void DrawPoint(float x, float y, float z);
-
-// Function to display points on the screen (OpenGL rendering loop)
-void Display();
+class Draw {
+    private:
+        AttributesManager& attributesManager; // AttributesManager에 대한 참조
+        // Function to draw a point at the given Cartesian coordinates (x, y, z)
+        void DrawPoint(float x, float y, float z, float size = 5.0f);
+        // Function to draw a line between two points
+        void DrawLine(const Vector3& start, const Vector3& end, float lineWidth = 2.0f);
+    public:
+        // Constructor
+        Draw(AttributesManager& manager);
+        // Function to initialize OpenGL settings
+        void InitializeOpenGL();
+        // Function to set up the viewport and projection
+        void SetupViewport(int width, int height);
+        // Drawing functions
+        void DrawNodeVector();
+        void DrawBearingVector();
+        void DrawForce();
+        void DrawSamplePoint();
+        // Function to display points on the screen (OpenGL rendering loop)
+        void Display();
+};
 
 #endif // DRAW_H

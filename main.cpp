@@ -2,13 +2,26 @@
  * Security: Top Secret
  * Author: Minseok Doo
  * Date: Oct 13, 2024
- * 
  */
+
+// 헤더 파일 포함
 #include <iostream>
 #include <cmath>
 #include <fstream>
-#include <GLUT/glut.h> // Added for OpenGL
-// Header File
+#ifdef __APPLE__
+#include <GLUT/glut.h> // MacOS 환경
+#else
+#include <GL/glut.h>   // 다른 환경
+#endif
+#include <sys/stat.h>
+#include <sys/types.h>
+#ifdef _WIN32
+#include <direct.h>
+#else
+#include <unistd.h> // Unix/Linux 계열
+#endif
+
+// 나머지 헤더 파일 포함
 #include "CoordinateConverter.h"
 #include "NodeVector.h"
 #include "BearingVector.h"
@@ -21,9 +34,9 @@
 
 // 전역 변수 선언
 AttributesManager attributesManager;
+Draw* draw; // Draw 클래스 포인터
 
-// Test Functions
-
+// 테스트 함수들
 void NodeVectorTest(AttributesManager& _attributesManager) {
     // 여러 개의 SphericalNodeVector 생성 및 NodeVector 초기화 (PI 단위 사용)
     SphericalNodeVector sphericalNode1(1, 10.0f, static_cast<float>(M_PI / 2), static_cast<float>(M_PI / 4));
@@ -42,8 +55,14 @@ void NodeVectorTest(AttributesManager& _attributesManager) {
 
 void BearingVectorTest(AttributesManager& _attributesManager) {
     // Bearing Vector 생성 및 초기화
-    SphericalNodeVector sphericalNode(1, 10.0f, static_cast<float>(M_PI / 2), static_cast<float>(M_PI / 4));
-    NodeVector node(1, sphericalNode);
+    const auto& storedNodes = _attributesManager.getNodeVectors();
+    if (storedNodes.empty()) {
+        std::cerr << "No nodes available for creating BearingVectors." << std::endl;
+        return;
+    }
+
+    // 첫 번째 노드를 사용하여 BearingVectors 생성
+    NodeVector node = storedNodes[0];
 
     BearingVector bearingVector1(1, 1, node, static_cast<float>(M_PI / 4), static_cast<float>(M_PI / 6), 5.0f, 3.0f, 2.0f);
     BearingVector bearingVector1_1(1, 2, node, static_cast<float>(M_PI / 2), static_cast<float>(M_PI / 9), 8.0f, 1.0f, 5.0f); // Node 1에 대한 두 번째 벡터
@@ -52,7 +71,7 @@ void BearingVectorTest(AttributesManager& _attributesManager) {
 
     // AttributesManager를 사용하여 BearingVector 생성 및 저장
     _attributesManager.CreateBearingVector(bearingVector1);
-    _attributesManager.CreateBearingVector(bearingVector1_1); // 추가된 BearingVector를 다시 활성화합니다.
+    _attributesManager.CreateBearingVector(bearingVector1_1);
     _attributesManager.CreateBearingVector(bearingVector2);
     _attributesManager.CreateBearingVector(bearingVector3);
 }
@@ -118,9 +137,25 @@ void AttributesManagerTest(AttributesManager& _attributesManager) {
     LinerSegmentTest(_attributesManager);
 }
 
+// 수정된 YamlConverterTest 함수
 void YamlConverterTest(AttributesManager& _attributesManager) {
     YamlConverter yamlConverter;
     std::string yamlString = yamlConverter.ToString(_attributesManager);
+
+    // 로그 디렉토리가 없는 경우 생성
+    struct stat info;
+    if (stat("../log", &info) != 0 || !(info.st_mode & S_IFDIR)) {
+        // 디렉토리가 없으므로 생성
+        #ifdef _WIN32
+            int result = _mkdir("../log");
+        #else
+            int result = mkdir("../log", 0777);
+        #endif
+        if (result != 0) {
+            std::cerr << "Error: Unable to create log directory." << std::endl;
+            return;
+        }
+    }
 
     // YAML 문자열을 출력하거나 파일로 저장 (로그로 저장)
     std::ofstream logFile("../log/attributes_log.yaml");
@@ -133,7 +168,8 @@ void YamlConverterTest(AttributesManager& _attributesManager) {
     }
 }
 
-void DrawTest() {
+// Display 콜백 함수
+void DisplayCallback() {
     // OpenGL 그리기 설정
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 화면과 깊이 버퍼 지우기
 
@@ -155,87 +191,14 @@ void DrawTest() {
 
     // 카메라 설정
     gluLookAt(0.0, 0.0, 15.0,  // 카메라 위치
-              5.0, 12.0, 5.0,    // 바라보는 지점
+              5.0, 12.0, 5.0,   // 바라보는 지점
               0.0, 1.0, 0.0);   // 상단을 위로 설정
 
-    // AttributesManager를 통해 객체들 가져오기
-    const auto& nodeVectors = attributesManager.getNodeVectors();
-    const auto& bearingVectors = attributesManager.getBearingVectors();
-    const auto& linerSegments = attributesManager.getLinerSegments();
-
-    if (nodeVectors.empty() || bearingVectors.empty() || linerSegments.empty()) {
-        std::cerr << "Insufficient objects for rendering!" << std::endl;
-        return;
-    }
-
-    // **노드 벡터 그리기 (녹색)**
-    glColor3f(0.0f, 1.0f, 0.0f);  // 녹색
-    glPointSize(10.0f); // 점 크기 증가
-    glBegin(GL_POINTS);
-    for (const auto& node : nodeVectors) {
-        CartesianNodeVector cartNode = node.GetCartesianNodeVector();
-        Vector3 nodePos(cartNode.x_i_n, cartNode.y_i_n, cartNode.z_i_n);
-        glVertex3f(nodePos.x, nodePos.y, nodePos.z);
-    }
-    glEnd();
-
-    // **베어링 벡터 그리기**
-    glColor3f(0.0f, 1.0f, 1.0f);  // 청록색
-    glPointSize(8.0f); // 점 크기 설정
-    glBegin(GL_POINTS);
-    for (const auto& bearing : bearingVectors) {
-        CartesianBearingVector cartBearing = bearing.convertToCartesianBearingVector();
-        Vector3 bearingPos(cartBearing.x, cartBearing.y, cartBearing.z);
-        glVertex3f(bearingPos.x, bearingPos.y, bearingPos.z);
-    }
-    glEnd();
-
-    // **노드와 베어링 벡터 사이의 선 그리기 (녹색)**
-    glColor3f(0.0f, 1.0f, 0.0f); // 녹색
-    glLineWidth(2.0f);
-    glBegin(GL_LINES);
-    for (const auto& bearing : bearingVectors) {
-        int nodeIndex = bearing.getNodeIndex() - 1; // 인덱스 조정 (0부터 시작)
-        if (nodeIndex >= 0 && nodeIndex < nodeVectors.size()) {
-            CartesianNodeVector cartNode = nodeVectors[nodeIndex].GetCartesianNodeVector();
-            Vector3 nodePos(cartNode.x_i_n, cartNode.y_i_n, cartNode.z_i_n);
-
-            CartesianBearingVector cartBearing = bearing.convertToCartesianBearingVector();
-            Vector3 bearingPos(cartBearing.x, cartBearing.y, cartBearing.z);
-
-            glVertex3f(nodePos.x, nodePos.y, nodePos.z);
-            glVertex3f(bearingPos.x, bearingPos.y, bearingPos.z);
-        }
-    }
-    glEnd();
-
-    // **힘 벡터 그리기 (빨간색)**
-    glColor3f(1.0f, 0.0f, 0.0f);  // 빨간색
-    glBegin(GL_LINES);
-    for (const auto& bearing : bearingVectors) {
-        CartesianBearingVector cartBearing = bearing.convertToCartesianBearingVector();
-        Vector3 bearingPos(cartBearing.x, cartBearing.y, cartBearing.z);
-
-        BearingVectorForce force = bearing.getForce();
-        Vector3 forceVec(force.f_x, force.f_y, force.f_z);
-        Vector3 forceEnd = bearingPos + forceVec;
-
-        glVertex3f(bearingPos.x, bearingPos.y, bearingPos.z);
-        glVertex3f(forceEnd.x, forceEnd.y, forceEnd.z);
-    }
-    glEnd();
-
-    // **LinerSegment를 사용하여 샘플링된 포인트 그리기 (회색)**
-    glColor3f(0.5f, 0.5f, 0.5f);  // 회색
-    glPointSize(5.0f);
-    glBegin(GL_POINTS);
-    for (const auto& segment : linerSegments) {
-        const std::vector<Vector3>& sampledPoints = segment.getSampledPoints();
-        for (const auto& point : sampledPoints) {
-            glVertex3f(point.x, point.y, point.z);
-        }
-    }
-    glEnd();
+    // 각 그리기 함수 호출
+    draw->DrawNodeVector();
+    draw->DrawBearingVector();
+    draw->DrawForce();
+    draw->DrawSamplePoint();
 
     // 그린 내용을 화면에 출력
     glutSwapBuffers();
@@ -251,21 +214,26 @@ int main(int argc, char** argv) {
     // 전역 AttributesManager 업데이트
     attributesManager = _attributesManager;
 
+    // Draw 객체 생성
+    draw = new Draw(attributesManager);
+
     // OpenGL 초기화
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(800, 600);
     glutCreateWindow("Draw Test");
 
-    // 배경 색상을 설정
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glEnable(GL_DEPTH_TEST);
+    // OpenGL 초기화 및 뷰포트 설정
+    draw->InitializeOpenGL();
 
-    // 콜백 함수 등록 (DrawTest 함수 등록)
-    glutDisplayFunc(DrawTest);
+    // 콜백 함수 등록 (DisplayCallback 함수 등록)
+    glutDisplayFunc(DisplayCallback);
 
     // OpenGL 메인 루프 시작
     glutMainLoop();
+
+    // 프로그램 종료 시 메모리 해제
+    delete draw;
 
     return 0;
 }
