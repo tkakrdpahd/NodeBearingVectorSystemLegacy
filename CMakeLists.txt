@@ -14,7 +14,12 @@ set(SOURCES
     module/CoordinateConverter.cpp
     module/NodeVector.cpp
     module/BearingVector.cpp
+    module/LinerSegment.cpp
+    module/SurfaceSegment.cpp
     module/AttributesManager.cpp
+    module/SocketServer.cpp
+    module/YamlConvertor.cpp
+    module/Draw.cpp
 )
 
 # 실행 파일 생성
@@ -23,5 +28,17 @@ add_executable(NodeBearingVectorSystem ${SOURCES})
 # 포함 디렉토리 설정 (헤더 파일 위치)
 target_include_directories(NodeBearingVectorSystem PRIVATE
     ${PROJECT_SOURCE_DIR}/module
-    # 필요한 경우 다른 포함 디렉토리 추가
 )
+
+# Find and link OpenGL
+find_package(OpenGL REQUIRED)
+
+# Link libraries (OpenGL and GLUT)
+target_link_libraries(NodeBearingVectorSystem PRIVATE
+    OpenGL::GL
+    "-framework GLUT"
+    "-framework OpenGL"
+)
+
+# Suppress OpenGL deprecation warnings
+target_compile_definitions(NodeBearingVectorSystem PRIVATE GL_SILENCE_DEPRECATION)

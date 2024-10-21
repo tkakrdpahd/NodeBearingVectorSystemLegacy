@@ -6,6 +6,7 @@
  */
 #include <iostream>
 #include <cmath>
+// Header File
 #include "CoordinateConverter.h"
 #include "NodeVector.h"
 #include "BearingVector.h"
@@ -15,6 +16,7 @@
 #include "SocketServer.h"
 #include "YamlConvertor.h"
 #include "Draw.h"
+// Test Function
 
 void NodeVectorTest(AttributesManager& _attributesManager) {
     // 여러 개의 SphericalNodeVector 생성 및 NodeVector 초기화 (PI 단위 사용)
