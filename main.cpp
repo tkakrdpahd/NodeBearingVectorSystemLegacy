@@ -8,6 +8,7 @@
 #include <iostream>
 #include <cmath>
 #include <fstream>
+#include <thread>
 #ifdef __APPLE__
 #include <GLUT/glut.h> // MacOS 환경
 #else
@@ -34,23 +35,20 @@
 
 // 전역 변수 선언
 AttributesManager attributesManager;
-Draw* draw; // Draw 클래스 포인터
+Draw* draw = nullptr; // Draw 클래스 포인터 초기화
 
 // 테스트 함수들
 void NodeVectorTest(AttributesManager& _attributesManager) {
     // 여러 개의 SphericalNodeVector 생성 및 NodeVector 초기화 (PI 단위 사용)
     SphericalNodeVector sphericalNode1(1, 10.0f, static_cast<float>(M_PI / 2), static_cast<float>(M_PI / 4));
     SphericalNodeVector sphericalNode2(2, 15.0f, static_cast<float>(M_PI / 4), static_cast<float>(M_PI / 2));
-    // SphericalNodeVector sphericalNode3(3, 20.0f, static_cast<float>(M_PI / 3), static_cast<float>(M_PI / 3));
 
     NodeVector node01(1, sphericalNode1);
     NodeVector node02(2, sphericalNode2);
-    // NodeVector node03(3, sphericalNode3);
 
     // AttributesManager를 사용하여 NodeVector 생성 및 저장
     _attributesManager.CreateNodeVector(node01);
     _attributesManager.CreateNodeVector(node02);
-    // _attributesManager.CreateNodeVector(node03);
 }
 
 void BearingVectorTest(AttributesManager& _attributesManager) {
@@ -67,13 +65,11 @@ void BearingVectorTest(AttributesManager& _attributesManager) {
     BearingVector bearingVector1(1, 1, node, static_cast<float>(M_PI / 4), static_cast<float>(M_PI / 6), 5.0f, 3.0f, 2.0f);
     BearingVector bearingVector1_1(1, 2, node, static_cast<float>(M_PI / -2), static_cast<float>(M_PI / 0.1), 8.0f, 1.0f, 5.0f); // Node 1에 대한 두 번째 벡터
     BearingVector bearingVector2(2, 1, node, static_cast<float>(M_PI / 3), static_cast<float>(M_PI / -4), 2.0f, 4.0f, 3.0f);
-    // BearingVector bearingVector3(3, 1, node, static_cast<float>(M_PI / 6), static_cast<float>(M_PI / 5), 1.0f, 1.5f, 2.5f);
 
     // AttributesManager를 사용하여 BearingVector 생성 및 저장
     _attributesManager.CreateBearingVector(bearingVector1);
     _attributesManager.CreateBearingVector(bearingVector1_1);
     _attributesManager.CreateBearingVector(bearingVector2);
-    // _attributesManager.CreateBearingVector(bearingVector3);
 }
 
 void LinerSegmentTest(AttributesManager& _attributesManager) {
@@ -170,55 +166,46 @@ void YamlConverterTest(AttributesManager& _attributesManager) {
 
 // Display 콜백 함수
 void DisplayCallback() {
-    // OpenGL 그리기 설정
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 화면과 깊이 버퍼 지우기
-
-    // 윈도우의 너비와 높이 가져오기
-    int width = glutGet(GLUT_WINDOW_WIDTH);
-    int height = glutGet(GLUT_WINDOW_HEIGHT);
-
-    // 뷰포트 설정
-    glViewport(0, 0, width, height);
-
-    // 투영 행렬 설정
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(45.0, static_cast<float>(width) / static_cast<float>(height), 1.0, 1000.0);
-
-    // 모델뷰 행렬로 전환
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    // 카메라 설정
-    gluLookAt(0.0, 0.0, 50.0,  // 카메라 위치
-              5.0, 12.0, 5.0,   // 바라보는 지점
-              0.0, 1.0, 0.0);   // 상단을 위로 설정
-
-    // 각 그리기 함수 호출
-    draw->DrawNodeVector();
-    draw->DrawBearingVector();
-    draw->DrawForce();
-    draw->DrawSamplePoint();
+    std::cout << "DisplayCallback called." << std::endl; // 디버깅용 로그 추가
+    // `Draw` 객체가 전역으로 선언되어 있어야 함
+    if (draw) {
+        draw->DrawNodeVector();
+        draw->DrawBearingVector();
+        draw->DrawForce();
+        draw->DrawSamplePoint();
+    } else {
+        std::cerr << "Draw object is not initialized." << std::endl;
+    }
 
     // 그린 내용을 화면에 출력
     glutSwapBuffers();
 }
 
-void Server() {
-    
+// Socket 서버 테스트 함수로 AttributesManager의 데이터를 반환하게 함
+void SocketServerTest(AttributesManager& attributesManager) {
+    int serverPort = 8080;
+    SocketServer server(serverPort, attributesManager);
+
+    if (server.startServer()) {
+        server.listenForClients();
+    } else {
+        std::cerr << "Failed to start the server." << std::endl;
+    }
 }
 
 int main(int argc, char** argv) {
-    AttributesManager _attributesManager;
+    // 전역 AttributesManager 사용
+    // AttributesManager attributesManager; // 제거
 
-    // 테스트 함수 호출
-    AttributesManagerTest(_attributesManager);
-    YamlConverterTest(_attributesManager);
+    // 테스트 함수 호출 (데이터 추가)
+    AttributesManagerTest(attributesManager);
+    YamlConverterTest(attributesManager);
 
-    // 전역 AttributesManager 업데이트
-    attributesManager = _attributesManager;
+    // 서버를 실행하여 클라이언트 요청에 응답 (별도의 스레드)
+    std::thread serverThread(SocketServerTest, std::ref(attributesManager));
+    serverThread.detach(); // 스레드를 분리하여 메인 스레드와 독립적으로 실행
 
-    // Draw 객체 생성
+    // Draw 객체 생성 및 전역 변수에 할당
     draw = new Draw(attributesManager);
 
     // OpenGL 초기화
@@ -233,11 +220,16 @@ int main(int argc, char** argv) {
     // 콜백 함수 등록 (DisplayCallback 함수 등록)
     glutDisplayFunc(DisplayCallback);
 
-    // OpenGL 메인 루프 시작
+    // OpenGL 메인 루프 시작 (블로킹 호출)
     glutMainLoop();
 
     // 프로그램 종료 시 메모리 해제
     delete draw;
+
+    // 서버 스레드 종료 대기 (실제로는 OpenGL 루프가 종료되지 않으므로 필요 없음)
+    // if (serverThread.joinable()) {
+    //     serverThread.join();
+    // }
 
     return 0;
 }

@@ -6,21 +6,19 @@
  * 
  * Purpose of Class
  * Convert AttributeManager to .yaml
- * 
- * Equations
  */
+
 #ifndef SOCKETSERVER_H
 #define SOCKETSERVER_H
 
 #include <string>
 #include <arpa/inet.h>
-
-// GetAttributesManagerData 함수 선언
-std::string GetAttributesManagerData();
+#include "AttributesManager.h" // AttributesManager 클래스 포함
 
 class SocketServer {
 public:
-    SocketServer(int serverPort);
+    // 생성자 선언 수정: AttributesManager 참조 추가
+    SocketServer(int serverPort, AttributesManager& attrManager);
     ~SocketServer();
 
     bool startServer();
@@ -32,6 +30,7 @@ private:
     int serverPort;
     int serverSocketFd;
     struct sockaddr_in serverAddr;
+    AttributesManager& attributesManager_; // AttributesManager 참조
 };
 
 #endif // SOCKETSERVER_H

@@ -8,15 +8,14 @@
  */
 
 #include "SocketServer.h"
-#include "AttributesManager.h"
 #include "YamlConverter.h"
 #include <iostream>
 #include <unistd.h>
 #include <cstring>
 #include <thread>
 
-SocketServer::SocketServer(int serverPort)
-    : serverPort(serverPort), serverSocketFd(-1) {
+SocketServer::SocketServer(int serverPort, AttributesManager& attrManager)
+    : serverPort(serverPort), serverSocketFd(-1), attributesManager_(attrManager) {
     memset(&serverAddr, 0, sizeof(serverAddr));
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_addr.s_addr = INADDR_ANY;
@@ -71,9 +70,8 @@ void SocketServer::listenForClients() {
                 std::cout << "Received: " << buffer << std::endl;
 
                 if (std::string(buffer) == "call_attributes_manager") {
-                    AttributesManager attributesManager;
-                    YamlConverter yamlConverter;
-                    std::string response = yamlConverter.ToString(attributesManager);
+                    // 기존 AttributesManager를 사용
+                    std::string response = YamlConverter().ToString(attributesManager_);
                     sendResponse(clientSocket, response);
                 } else {
                     sendResponse(clientSocket, "Unknown command received.");
