@@ -204,6 +204,10 @@ void DisplayCallback() {
     glutSwapBuffers();
 }
 
+void Server() {
+    
+}
+
 int main(int argc, char** argv) {
     AttributesManager _attributesManager;
 
