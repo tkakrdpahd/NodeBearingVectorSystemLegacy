@@ -41,16 +41,16 @@ void NodeVectorTest(AttributesManager& _attributesManager) {
     // 여러 개의 SphericalNodeVector 생성 및 NodeVector 초기화 (PI 단위 사용)
     SphericalNodeVector sphericalNode1(1, 10.0f, static_cast<float>(M_PI / 2), static_cast<float>(M_PI / 4));
     SphericalNodeVector sphericalNode2(2, 15.0f, static_cast<float>(M_PI / 4), static_cast<float>(M_PI / 2));
-    SphericalNodeVector sphericalNode3(3, 20.0f, static_cast<float>(M_PI / 3), static_cast<float>(M_PI / 3));
+    // SphericalNodeVector sphericalNode3(3, 20.0f, static_cast<float>(M_PI / 3), static_cast<float>(M_PI / 3));
 
     NodeVector node01(1, sphericalNode1);
     NodeVector node02(2, sphericalNode2);
-    NodeVector node03(3, sphericalNode3);
+    // NodeVector node03(3, sphericalNode3);
 
     // AttributesManager를 사용하여 NodeVector 생성 및 저장
     _attributesManager.CreateNodeVector(node01);
     _attributesManager.CreateNodeVector(node02);
-    _attributesManager.CreateNodeVector(node03);
+    // _attributesManager.CreateNodeVector(node03);
 }
 
 void BearingVectorTest(AttributesManager& _attributesManager) {
@@ -65,15 +65,15 @@ void BearingVectorTest(AttributesManager& _attributesManager) {
     NodeVector node = storedNodes[0];
 
     BearingVector bearingVector1(1, 1, node, static_cast<float>(M_PI / 4), static_cast<float>(M_PI / 6), 5.0f, 3.0f, 2.0f);
-    BearingVector bearingVector1_1(1, 2, node, static_cast<float>(M_PI / 2), static_cast<float>(M_PI / 9), 8.0f, 1.0f, 5.0f); // Node 1에 대한 두 번째 벡터
-    BearingVector bearingVector2(2, 1, node, static_cast<float>(M_PI / 3), static_cast<float>(M_PI / 8), 2.0f, 4.0f, 3.0f);
-    BearingVector bearingVector3(3, 1, node, static_cast<float>(M_PI / 6), static_cast<float>(M_PI / 5), 1.0f, 1.5f, 2.5f);
+    BearingVector bearingVector1_1(1, 2, node, static_cast<float>(M_PI / -2), static_cast<float>(M_PI / 0.1), 8.0f, 1.0f, 5.0f); // Node 1에 대한 두 번째 벡터
+    BearingVector bearingVector2(2, 1, node, static_cast<float>(M_PI / 3), static_cast<float>(M_PI / -4), 2.0f, 4.0f, 3.0f);
+    // BearingVector bearingVector3(3, 1, node, static_cast<float>(M_PI / 6), static_cast<float>(M_PI / 5), 1.0f, 1.5f, 2.5f);
 
     // AttributesManager를 사용하여 BearingVector 생성 및 저장
     _attributesManager.CreateBearingVector(bearingVector1);
     _attributesManager.CreateBearingVector(bearingVector1_1);
     _attributesManager.CreateBearingVector(bearingVector2);
-    _attributesManager.CreateBearingVector(bearingVector3);
+    // _attributesManager.CreateBearingVector(bearingVector3);
 }
 
 void LinerSegmentTest(AttributesManager& _attributesManager) {
