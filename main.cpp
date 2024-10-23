@@ -166,6 +166,30 @@ void YamlConverterTest(AttributesManager& _attributesManager) {
 
 // Display 콜백 함수
 void DisplayCallback() {
+    // OpenGL 그리기 설정
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 화면과 깊이 버퍼 지우기
+
+    // 윈도우의 너비와 높이 가져오기
+    int width = glutGet(GLUT_WINDOW_WIDTH);
+    int height = glutGet(GLUT_WINDOW_HEIGHT);
+
+    // 뷰포트 설정
+    glViewport(0, 0, width, height);
+
+    // 투영 행렬 설정
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(45.0, static_cast<float>(width) / static_cast<float>(height), 1.0, 1000.0);
+
+    // 모델뷰 행렬로 전환
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    // 카메라 설정
+    gluLookAt(0.0, 0.0, 50.0,  // 카메라 위치
+              5.0, 12.0, 5.0,   // 바라보는 지점
+              0.0, 1.0, 0.0);   // 상단을 위로 설정
+
     std::cout << "DisplayCallback called." << std::endl; // 디버깅용 로그 추가
     // `Draw` 객체가 전역으로 선언되어 있어야 함
     if (draw) {
