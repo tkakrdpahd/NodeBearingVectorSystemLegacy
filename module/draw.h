@@ -34,7 +34,7 @@ class Draw {
         void InitializeOpenGL();
         // Function to set up the viewport and projection
         void SetupViewport(int width, int height);
-        // UpdateCameraLocation by gluLookAt()
+        // UpdateCameraLocation by gluLookAt();
         void UpdateCameraLocation();
         // Drawing functions
         void DrawNodeVector();
