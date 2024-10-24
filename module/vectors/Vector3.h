@@ -1,5 +1,8 @@
 #include <vector>
 
+#ifndef VECTOR3_H
+#define VECTOR3_H
+
 // Simple Vector3 struct for vector operations
 struct Vector3 {
     float x, y, z;
@@ -31,3 +34,5 @@ struct Vector3 {
         return Vector3(v.x * scalar, v.y * scalar, v.z * scalar);
     }
 };
+
+#endif // VECTOR3_H
