@@ -1,5 +1,4 @@
 /* Vector3.h
- * Linked file Vector3.cpp
  * Security: Confidential
  * Author: Minseok Doo
  * Date: Oct 24, 2024
