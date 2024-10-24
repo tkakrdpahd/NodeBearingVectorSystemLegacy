@@ -14,6 +14,7 @@
 #ifndef NODEVECTOR_H
 #define NODEVECTOR_H
 
+#include "Vector3.h"
 #include "CoordinateConverter.h"
 
 // Spherical Node Vector 구조체
