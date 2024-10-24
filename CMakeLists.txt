@@ -8,19 +8,22 @@ project(TheNewDream VERSION 1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+# 자동으로 소스 파일 검색 (CMake 3.12 이상에서 ** 사용 가능)
+file(GLOB_RECURSE SOURCES "main.cpp" "module/*.cpp")
+
 # Source files
-set(SOURCES
-    main.cpp
-    module/CoordinateConverter.cpp
-    module/NodeVector.cpp
-    module/BearingVector.cpp
-    module/LinerSegment.cpp
-    module/SurfaceSegment.cpp
-    module/AttributesManager.cpp
-    module/SocketServer.cpp
-    module/YamlConverter.cpp
-    module/Draw.cpp
-)
+# set(SOURCES
+#     main.cpp
+#     module/CoordinateConverter.cpp
+#     module/NodeVector.cpp
+#     module/BearingVector.cpp
+#     module/LinerSegment.cpp
+#     module/SurfaceSegment.cpp
+#     module/AttributesManager.cpp
+#     module/SocketServer.cpp
+#     module/YamlConverter.cpp
+#     module/Draw.cpp
+# )
 
 # Add executable
 add_executable(NodeBearingVectorSystem ${SOURCES})
