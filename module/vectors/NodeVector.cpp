@@ -8,19 +8,21 @@
  */
 
 #include "NodeVector.h"
+#include "CoordinateConverter.h" // CoordinateConverter 포함
+#include <cmath> // 수학 함수 사용을 위해 추가
 
 // 기본 생성자
 NodeVector::NodeVector()
     : sphericalNode(), cartesianNode() {}
 
 // Spherical Node Vector를 사용한 생성자
-NodeVector::NodeVector(int index, const SphericalNodeVector& snv)
+NodeVector::NodeVector(const SphericalNodeVector& snv)
     : sphericalNode(snv) {
     ConvertSphericalToCartesian();  // 생성 시 Cartesian 좌표로 변환
 }
 
 // Cartesian Node Vector를 사용한 생성자
-NodeVector::NodeVector(int index, const CartesianNodeVector& cnv)
+NodeVector::NodeVector(const CartesianNodeVector& cnv)
     : cartesianNode(cnv) {
     ConvertCartesianToSpherical();  // 생성 시 Spherical 좌표로 변환
 }
@@ -37,16 +39,40 @@ CartesianNodeVector NodeVector::GetCartesianNodeVector() const {
 
 // Spherical 좌표를 Cartesian 좌표로 변환하는 함수
 void NodeVector::ConvertSphericalToCartesian() {
-    CartesianVector cartVec = CoordinateConverter::sphericalToCartesian(
-        SphericalVector(sphericalNode.r_i_n, sphericalNode.theta_i_n, sphericalNode.phi_i_n));
-    
-    cartesianNode = CartesianNodeVector(sphericalNode.i_n, cartVec.x, cartVec.y, cartVec.z);
+    // Vector3에서 r, theta, phi 추출
+    float r = sphericalNode.sphericalCoords.x;
+    float theta = sphericalNode.sphericalCoords.y; // 경도 (radians)
+    float phi = sphericalNode.sphericalCoords.z;   // 위도 (radians)
+
+    // SphericalVector 생성
+    SphericalVector sv(r, theta, phi);
+
+    // CoordinateConverter를 사용하여 변환
+    CartesianVector cv = CoordinateConverter::sphericalToCartesian(sv);
+
+    // 변환된 CartesianVector를 Vector3로 매핑
+    cartesianNode.cartesianCoords = Vector3(cv.x, cv.y, cv.z);
+
+    // 인덱스 동기화
+    cartesianNode.i_n = sphericalNode.i_n;
 }
 
 // Cartesian 좌표를 Spherical 좌표로 변환하는 함수
 void NodeVector::ConvertCartesianToSpherical() {
-    SphericalVector sphVec = CoordinateConverter::cartesianToSpherical(
-        CartesianVector(cartesianNode.x_i_n, cartesianNode.y_i_n, cartesianNode.z_i_n));
-    
-    sphericalNode = SphericalNodeVector(cartesianNode.i_n, sphVec.r, sphVec.theta, sphVec.phi);
+    // Vector3에서 x, y, z 추출
+    float x = cartesianNode.cartesianCoords.x;
+    float y = cartesianNode.cartesianCoords.y;
+    float z = cartesianNode.cartesianCoords.z;
+
+    // CartesianVector 생성
+    CartesianVector cv(x, y, z);
+
+    // CoordinateConverter를 사용하여 변환
+    SphericalVector sv = CoordinateConverter::cartesianToSpherical(cv);
+
+    // 변환된 SphericalVector를 Vector3로 매핑
+    sphericalNode.sphericalCoords = Vector3(sv.r, sv.theta, sv.phi);
+
+    // 인덱스 동기화
+    sphericalNode.i_n = cartesianNode.i_n;
 }

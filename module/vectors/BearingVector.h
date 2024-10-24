@@ -1,33 +1,30 @@
-/* BearingVector.h
- * Linked file BearingVector.cpp
- * Security: Top Secret
- * Author: Minseok Doo
- * Date: Oct 7, 2024
- * 
- * Purpose: Define functions for the BearingVector class
- * 
- * Equations
- * Equ(1): \vec{B_i}=\left(\begin{matrix}\sin{\phi_i}\cos{\theta_i}\\\sin{\phi_i}\sin{\theta_i}\cos{\phi_i}\\\end{matrix}\right)
- * Equ(2): \vec{B_{i,d}}=\left(B_{i,d,x},B_{i,d,y},B_{i,d,z}\right)
- * Equ(3): \vec{F_i}=F_{x_i}\thinsp\hat{x}+F_{y_i}\thinsp\hat{y}+F_{z_i}\thinsp\hat{z}
- */
-
 #ifndef BEARINGVECTOR_H
 #define BEARINGVECTOR_H
 
+#include "Vector3.h"
 #include "CoordinateConverter.h"
 #include "NodeVector.h"
 #include <cmath>
 
+/**
+ * @brief Structure to represent the force vector in BearingVector.
+ */
 struct BearingVectorForce { 
-    float f_x, f_y, f_z; 
+    Vector3 Force;
+    // float f_x, f_y, f_z; // Removed as we are using Vector3
 };
 
+/**
+ * @brief Structure to represent angular acceleration in BearingVector.
+ */
 struct BearingVectorAngularAcceleration {
-    float phi_i, theta_i; // phi_i: Polar angle (φ), theta_i: Azimuthal angle (θ);
+    float phi_i;    ///< Polar angle (φ)
+    float theta_i;  ///< Azimuthal angle (θ)
 };
 
-// Struct to hold full spherical bearing vector data
+/**
+ * @brief Structure to hold full spherical bearing vector data.
+ */
 struct SphericalBearingVectorStruct {
     int i; // Node vector index
     int d; // Bearing vector depth (vector depth)
@@ -36,48 +33,115 @@ struct SphericalBearingVectorStruct {
     BearingVectorForce force;  // Force vector (Fx, Fy, Fz)
 };
 
-// Struct to hold Cartesian bearing vector data
+/**
+ * @brief Structure to hold Cartesian bearing vector data.
+ */
 struct CartesianBearingVector {
     int i; // Node vector index
     int d; // Bearing vector depth (vector depth)
-    float x, y, z; // Cartesian
+    Vector3 cartesianCoords; // Cartesian coordinates (x, y, z)
     BearingVectorForce force; // Force vector in Cartesian coordinates
 
-    // Constructor to initialize the Cartesian Bearing Vector
+    /**
+     * @brief Constructor to initialize the Cartesian Bearing Vector.
+     * 
+     * @param index Node vector index.
+     * @param depth Bearing vector depth.
+     * @param x_val X-component of the Cartesian vector.
+     * @param y_val Y-component of the Cartesian vector.
+     * @param z_val Z-component of the Cartesian vector.
+     * @param f_x X-component of the force vector.
+     * @param f_y Y-component of the force vector.
+     * @param f_z Z-component of the force vector.
+     */
     CartesianBearingVector(int index = 0, int depth = 0, float x_val = 0.0f, float y_val = 0.0f, float z_val = 0.0f, float f_x = 0.0f, float f_y = 0.0f, float f_z = 0.0f)
-        : i(index), d(depth), x(x_val), y(y_val), z(z_val) {
-        force.f_x = f_x;
-        force.f_y = f_y;
-        force.f_z = f_z;
+        : i(index), d(depth), cartesianCoords(x_val, y_val, z_val) {
+        force.Force = Vector3(f_x, f_y, f_z);
     }
 };
 
+/**
+ * @brief BearingVector 클래스.
+ *        Spherical 및 Cartesian 형태의 Bearing Vector를 관리.
+ */
 class BearingVector {
 private:
     SphericalBearingVectorStruct sphericalBearing;
     CartesianBearingVector cartesianBearing;
+
 public:
-    // Constructor
+    /**
+     * @brief Constructor for BearingVector.
+     * 
+     * @param index Node vector index.
+     * @param depth Bearing vector depth.
+     * @param node NodeVector instance.
+     * @param phi_i Polar angle (φ).
+     * @param theta_i Azimuthal angle (θ).
+     * @param f_x X-component of the force vector.
+     * @param f_y Y-component of the force vector.
+     * @param f_z Z-component of the force vector.
+     */
     BearingVector(int index, int depth, const NodeVector& node, float phi_i, float theta_i, float f_x, float f_y, float f_z);
 
-    // Function to calculate the Cartesian components of the Bearing Vector (unit vector) based on the Node Vector
+    /**
+     * @brief Function to calculate the Cartesian components of the Bearing Vector (unit vector) based on the Node Vector.
+     * 
+     * @param x Reference to store the x-component.
+     * @param y Reference to store the y-component.
+     * @param z Reference to store the z-component.
+     */
     void calculateBearingVector(float& x, float& y, float& z) const;
 
-    // Function to convert the spherical bearing vector to a Cartesian bearing vector
+    /**
+     * @brief Function to convert the spherical bearing vector to a Cartesian bearing vector.
+     * 
+     * @return CartesianBearingVector Converted Cartesian bearing vector.
+     */
     CartesianBearingVector convertToCartesianBearingVector() const;
 
-    // Function to convert the Cartesian bearing vector back to spherical coordinates (using node vector)
+    /**
+     * @brief Function to convert the Cartesian bearing vector back to spherical coordinates (using node vector).
+     * 
+     * @param cartesian Cartesian bearing vector to convert.
+     * @param node NodeVector instance for reference.
+     * @return SphericalBearingVectorStruct Converted spherical bearing vector.
+     */
     SphericalBearingVectorStruct convertToSphericalBearingVector(const CartesianBearingVector& cartesian, const NodeVector& node) const;
 
-    // Function to get the force vector components
+    /**
+     * @brief Function to get the force vector components.
+     * 
+     * @return BearingVectorForce Force vector.
+     */
     BearingVectorForce getForce() const;
 
-    // Getters for the spherical angles (φ, θ)
+    /**
+     * @brief Getter for the polar angle (φ).
+     * 
+     * @return float Polar angle.
+     */
     float getPhi() const;
+
+    /**
+     * @brief Getter for the azimuthal angle (θ).
+     * 
+     * @return float Azimuthal angle.
+     */
     float getTheta() const;
 
-    // Get node index and bearing vector depth
+    /**
+     * @brief Getter for the node index.
+     * 
+     * @return int Node index.
+     */
     int getNodeIndex() const;
+
+    /**
+     * @brief Getter for the bearing vector depth.
+     * 
+     * @return int Bearing vector depth.
+     */
     int getDepth() const;
 };
 

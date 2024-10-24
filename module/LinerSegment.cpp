@@ -20,6 +20,7 @@
  * Equ(13): \vec{P_n}=\vec{N_2}
  * Equ(14): \kappa\left(t\right)=\frac{|\vec{B^{\prime\prime}}\left(t\right)\times\vec{B^\prime}\left(t\right)|}{|\vec{B^\prime}\left(t\right)|^3}
  */
+
 #include "LinerSegment.h"
 
 // 성분별 곱셈 함수 추가
@@ -39,7 +40,7 @@ void LinerSegment::calculateControlPoints() {
 
     // Equ(9): P0 = N1
     CartesianNodeVector N1 = node_1.node.GetCartesianNodeVector();
-    Vector3 P0(N1.x_i_n, N1.y_i_n, N1.z_i_n);
+    Vector3 P0(N1.cartesianCoords.x, N1.cartesianCoords.y, N1.cartesianCoords.z);
     controlPoints.push_back(P0);
 
     // Equ(10): Pi = N1 + Ci, 1 ≤ i ≤ D1
@@ -53,7 +54,7 @@ void LinerSegment::calculateControlPoints() {
         node_1.bearings[i].calculateBearingVector(bx, by, bz);
         BearingVectorForce Fi = node_1.bearings[i].getForce();
         Vector3 Bi(bx, by, bz);
-        Vector3 FiVec(Fi.f_x, Fi.f_y, Fi.f_z);
+        Vector3 FiVec(Fi.Force.x, Fi.Force.y, Fi.Force.z); // 수정됨
 
         // Equ(4): Vi = Bi ⊗ Fi (성분별 곱셈)
         Vector3 Vi = hadamardProduct(Bi, FiVec); // Vi = Bi ⊗ Fi
@@ -68,24 +69,26 @@ void LinerSegment::calculateControlPoints() {
 
     // Equ(13): Pn = N2
     CartesianNodeVector N2 = node_2.node.GetCartesianNodeVector();
-    Vector3 Pn(N2.x_i_n, N2.y_i_n, N2.z_i_n);
+    Vector3 Pn(N2.cartesianCoords.x, N2.cartesianCoords.y, N2.cartesianCoords.z); // 수정됨
 
     // Equ(11): P_{D1+1} = α(N1 + C_{D1}) + (1 - α)(N2 - C_{1})
     Vector3 C_D1 = C_list_1.back(); // 노드 1의 마지막 Ci
     Vector3 C_1_D2; // 노드 2의 첫 번째 Ci
 
     // 노드 2의 첫 번째 Ci 계산
-    {
+    if (node_2.bearings.size() > 0) { // 안전성 추가
         // Calculate Ci using Equ(4) and Equ(5)
         float bx, by, bz;
         node_2.bearings[0].calculateBearingVector(bx, by, bz);
         BearingVectorForce Fi = node_2.bearings[0].getForce();
         Vector3 Bi(bx, by, bz);
-        Vector3 FiVec(Fi.f_x, Fi.f_y, Fi.f_z);
+        Vector3 FiVec(Fi.Force.x, Fi.Force.y, Fi.Force.z); // 수정됨
         C_1_D2 = hadamardProduct(Bi, FiVec); // Vi = Bi ⊗ Fi
+    } else {
+        C_1_D2 = Vector3(0.0f, 0.0f, 0.0f); // 기본값 설정
     }
 
-    Vector3 PD1plus1 = alpha * (P0 + C_D1) + (1 - alpha) * (Pn - C_1_D2);
+    Vector3 PD1plus1 = alpha * (P0 + C_D1) + (1.0f - alpha) * (Pn - C_1_D2);
     controlPoints.push_back(PD1plus1);
 
     // Equ(12): P_{D1+1+j} = N2 - C_{j}, 1 ≤ j ≤ D2
@@ -97,7 +100,7 @@ void LinerSegment::calculateControlPoints() {
         node_2.bearings[j].calculateBearingVector(bx, by, bz);
         BearingVectorForce Fi = node_2.bearings[j].getForce();
         Vector3 Bi(bx, by, bz);
-        Vector3 FiVec(Fi.f_x, Fi.f_y, Fi.f_z);
+        Vector3 FiVec(Fi.Force.x, Fi.Force.y, Fi.Force.z); // 수정됨
         Vector3 Vi = hadamardProduct(Bi, FiVec); // Vi = Bi ⊗ Fi
         Ci = Vi; // d_{s,i}는 1로 가정
 

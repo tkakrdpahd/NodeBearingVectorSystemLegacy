@@ -17,28 +17,28 @@
 #include "Vector3.h"
 #include "CoordinateConverter.h"
 
-// Spherical Node Vector 구조체
+// SphericalNodeVector 구조체
 struct SphericalNodeVector {
     int i_n; // index of node vector
-    float r_i_n;
-    float theta_i_n;
-    float phi_i_n;
+    Vector3 sphericalCoords; // x: r, y: theta, z: phi
 
-    // 생성자
+    // 기본 생성자
     SphericalNodeVector(int index = 0, float r = 0.0f, float theta = 0.0f, float phi = 0.0f)
-        : i_n(index), r_i_n(r), theta_i_n(theta), phi_i_n(phi) {}
+        : i_n(index), sphericalCoords(r, theta, phi) {}
+
+    // 추가 생성자: (int, Vector3)
+    SphericalNodeVector(int index, const Vector3& coords)
+        : i_n(index), sphericalCoords(coords) {}
 };
 
 // Cartesian Node Vector 구조체
 struct CartesianNodeVector {
     int i_n; // index of node vector
-    float x_i_n;
-    float y_i_n;
-    float z_i_n;
+    Vector3 cartesianCoords; // x: x, y: y, z: z
 
     // 생성자
     CartesianNodeVector(int index = 0, float x = 0.0f, float y = 0.0f, float z = 0.0f)
-        : i_n(index), x_i_n(x), y_i_n(y), z_i_n(z) {}
+        : i_n(index), cartesianCoords(x, y, z) {}
 };
 
 // NodeVector 클래스 선언
@@ -52,10 +52,10 @@ public:
     NodeVector();
 
     // Spherical Node Vector를 사용한 생성자
-    NodeVector(int index, const SphericalNodeVector& snv);
+    NodeVector(const SphericalNodeVector& snv);
 
     // Cartesian Node Vector를 사용한 생성자
-    NodeVector(int index, const CartesianNodeVector& cnv);
+    NodeVector(const CartesianNodeVector& cnv);
 
     // Spherical Node Vector를 반환하는 함수
     SphericalNodeVector GetSphericalNodeVector() const;

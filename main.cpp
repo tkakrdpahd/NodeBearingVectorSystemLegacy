@@ -40,11 +40,16 @@ Draw* draw = nullptr; // Draw 클래스 포인터 초기화
 // 테스트 함수들
 void NodeVectorTest(AttributesManager& _attributesManager) {
     // 여러 개의 SphericalNodeVector 생성 및 NodeVector 초기화 (PI 단위 사용)
-    SphericalNodeVector sphericalNode1(1, 10.0f, static_cast<float>(M_PI / 2), static_cast<float>(M_PI / 4));
-    SphericalNodeVector sphericalNode2(2, 15.0f, static_cast<float>(M_PI / 4), static_cast<float>(M_PI / 2));
+    Vector3 sphericalCoords1(10.0f, static_cast<float>(M_PI / 2), static_cast<float>(M_PI / 4)); // r, theta, phi
+    Vector3 sphericalCoords2(15.0f, static_cast<float>(M_PI / 4), static_cast<float>(M_PI / 2)); // r, theta, phi
 
-    NodeVector node01(1, sphericalNode1);
-    NodeVector node02(2, sphericalNode2);
+    // SphericalNodeVector 생성자 호출: (int, Vector3)
+    SphericalNodeVector sphericalNode1(1, sphericalCoords1);
+    SphericalNodeVector sphericalNode2(2, sphericalCoords2);
+
+    // NodeVector 생성자 호출 (SphericalNodeVector 사용)
+    NodeVector node01(sphericalNode1);
+    NodeVector node02(sphericalNode2);
 
     // AttributesManager를 사용하여 NodeVector 생성 및 저장
     _attributesManager.CreateNodeVector(node01);
@@ -187,7 +192,7 @@ void DisplayCallback() {
 
     // 카메라 설정
     gluLookAt(0.0, 0.0, 50.0,  // 카메라 위치
-              5.0, 12.0, 5.0,   // 바라보는 지점
+              0.0, 0.0, 0.0,   // 바라보는 지점
               0.0, 1.0, 0.0);   // 상단을 위로 설정
 
     std::cout << "DisplayCallback called." << std::endl; // 디버깅용 로그 추가

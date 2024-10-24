@@ -56,7 +56,8 @@ void Draw::DrawNodeVector() {
     for (const auto& node : nodeVectors) {
         glColor3f(0.0f, 1.0f, 0.0f);  // 녹색
         CartesianNodeVector cartNode = node.GetCartesianNodeVector();
-        DrawPoint(cartNode.x_i_n, cartNode.y_i_n, cartNode.z_i_n, 10.0f);
+        // 수정: x_i_n, y_i_n, z_i_n 대신 cartesianCoords.x, cartesianCoords.y, cartesianCoords.z 사용
+        DrawPoint(cartNode.cartesianCoords.x, cartNode.cartesianCoords.y, cartNode.cartesianCoords.z, 10.0f);
     }
 }
 
@@ -70,15 +71,17 @@ void Draw::DrawBearingVector() {
 
         // 베어링 벡터 위치 그리기 (청록색 점)
         glColor3f(0.0f, 1.0f, 1.0f);  // 청록색
-        DrawPoint(cartBearing.x, cartBearing.y, cartBearing.z, 8.0f);
+        // 수정: cartBearing.x, cartBearing.y, cartBearing.z 대신 cartBearing.cartesianCoords.x, y, z 사용
+        DrawPoint(cartBearing.cartesianCoords.x, cartBearing.cartesianCoords.y, cartBearing.cartesianCoords.z, 8.0f);
 
         // 노드와 베어링 벡터 사이의 선 그리기
         int nodeIndex = bearing.getNodeIndex() - 1; // 인덱스 조정
         const auto& nodeVectors = attributesManager.getNodeVectors();
         if (nodeIndex >= 0 && nodeIndex < nodeVectors.size()) {
             CartesianNodeVector cartNode = nodeVectors[nodeIndex].GetCartesianNodeVector();
-            Vector3 nodePos(cartNode.x_i_n, cartNode.y_i_n, cartNode.z_i_n);
-            Vector3 bearingPos(cartBearing.x, cartBearing.y, cartBearing.z);
+            // 수정: x_i_n, y_i_n, z_i_n 대신 cartesianCoords.x, cartesianCoords.y, cartesianCoords.z 사용
+            Vector3 nodePos(cartNode.cartesianCoords.x, cartNode.cartesianCoords.y, cartNode.cartesianCoords.z);
+            Vector3 bearingPos(cartBearing.cartesianCoords.x, cartBearing.cartesianCoords.y, cartBearing.cartesianCoords.z);
 
             glColor3f(0.0f, 1.0f, 0.0f); // 녹색
             DrawLine(nodePos, bearingPos, 2.0f);
@@ -93,11 +96,12 @@ void Draw::DrawForce() {
 
     for (const auto& bearing : bearingVectors) {
         CartesianBearingVector cartBearing = bearing.convertToCartesianBearingVector();
-        Vector3 bearingPos(cartBearing.x, cartBearing.y, cartBearing.z);
+        Vector3 bearingPos(cartBearing.cartesianCoords.x, cartBearing.cartesianCoords.y, cartBearing.cartesianCoords.z);
         BearingVectorForce force = bearing.getForce();
 
         // 힘 벡터 (빨간색)
-        Vector3 forceVec(force.f_x, force.f_y, force.f_z);
+        // 수정: f_x, f_y, f_z 대신 Force.x, Force.y, Force.z 사용
+        Vector3 forceVec(force.Force.x, force.Force.y, force.Force.z);
         Vector3 forceEnd = bearingPos + forceVec;
 
         glColor3f(1.0f, 0.0f, 0.0f);  // 빨간색
@@ -128,7 +132,7 @@ void Draw::Display() {
     glLoadIdentity();
 
     // 카메라 설정
-    gluLookAt(0.0, 0.0, 0.0,  // 카메라 위치
+    gluLookAt(0.0, 0.0, 10.0,  // 카메라 위치 (원래 0,0,0은 바라보는 지점)
               0.0, 0.0, 0.0,    // 바라보는 지점
               0.0, 1.0, 0.0);   // 상단을 위로 설정
 
