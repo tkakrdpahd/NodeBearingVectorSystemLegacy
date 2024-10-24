@@ -9,13 +9,21 @@
 
 #include <cmath>  // sqrt() 함수 사용을 위해 필요
 
-// Simple Vector3 struct for vector operations
+// Simple Vector3 struct using array internally
 struct Vector3 {
-    float x, y, z;
+    union {
+        float values[3];  // 배열로 내부 저장
+        struct {          // 기존의 x, y, z 멤버 유지
+            float x, y, z;
+        };
+    };
 
     // Constructor with default values
-    Vector3(float xVal = 0, float yVal = 0, float zVal = 0) 
-        : x(xVal), y(yVal), z(zVal) {}
+    Vector3(float xVal = 0, float yVal = 0, float zVal = 0) {
+        values[0] = xVal;  // x
+        values[1] = yVal;  // y
+        values[2] = zVal;  // z
+    }
 
     // Vector addition
     Vector3 operator+(const Vector3& v) const {
@@ -59,6 +67,15 @@ struct Vector3 {
     // Friend function for scalar multiplication (float * Vector3)
     friend Vector3 operator*(float scalar, const Vector3& v) {
         return Vector3(v.x * scalar, v.y * scalar, v.z * scalar);
+    }
+
+    // Access individual elements via operator[]
+    float operator[](int index) const {
+        return values[index];
+    }
+
+    float& operator[](int index) {
+        return values[index];
     }
 };
 
