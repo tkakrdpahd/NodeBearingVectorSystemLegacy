@@ -32,6 +32,7 @@ add_executable(NodeBearingVectorSystem ${SOURCES})
 target_include_directories(NodeBearingVectorSystem PRIVATE
     ${PROJECT_SOURCE_DIR}/module
     ${PROJECT_SOURCE_DIR}/module/vectors
+    ${PROJECT_SOURCE_DIR}/module/segment
     ${PROJECT_SOURCE_DIR}/module/operator
     /opt/homebrew/include # Manually add yaml-cpp include path here
 )
