@@ -106,7 +106,7 @@ void LinerSegmentTest(AttributesManager& _attributesManager) {
         std::cout << "Node 2 bearing vectors count: " << node2.bearings.size() << std::endl;
 
         // LinerSegment 생성 및 AttributesManager에 추가
-        LinerSegment linerSegment(node1, node2, 500);
+        LinerSegment linerSegment(node1, node2, 50);
 
         // AttributesManager를 사용하여 LinerSegment 생성 및 저장
         _attributesManager.CreateLinerSegment(linerSegment);
