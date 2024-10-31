@@ -193,7 +193,7 @@ void DisplayCallback() {
     // 카메라 설정
     gluLookAt(0.0, 0.0, 50.0,  // 카메라 위치
               0.0, 0.0, 0.0,   // 바라보는 지점
-              0.0, 1.0, 0.0);   // 상단을 위로 설정
+              -1.0, 1.0, 1.0);   // 상단을 위로 설정
 
     std::cout << "DisplayCallback called." << std::endl; // 디버깅용 로그 추가
     // `Draw` 객체가 전역으로 선언되어 있어야 함
